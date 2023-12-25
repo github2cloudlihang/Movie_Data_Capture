@@ -4,6 +4,8 @@ import re
 import os
 import secrets
 import inspect
+
+import cloudscraper
 from lxml import etree
 from urllib.parse import urljoin
 from .parser import Parser
@@ -31,7 +33,17 @@ class Javbus(Parser):
     expr_uncensored = '//*[@id="navbar"]/ul[1]/li[@class="active"]/a[contains(@href,"uncensored")]'
 
     def extraInit(self):
-        self.extraheader = {'Accept-Language': 'zh-CN,zh;q=0.9,ja;q=0.8,ru;q=0.7'}
+        self.extraheader = {
+            'authority': 'www.javbus.com',
+            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'accept-language': 'zh-CN,zh;q=0.9',
+            'cache-control': 'no-cache',
+            'pragma': 'no-cache',
+            'sec-ch-ua': '"Google Chrome";v="117", "Not;A=Brand";v="8", "Chromium";v="117"',
+            'sec-ch-ua-platform': '"Windows"',
+            'upgrade-insecure-requests': '1',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36'
+        }
     
     def search(self, number):
         self.number = number
@@ -60,6 +72,10 @@ class Javbus(Parser):
             return result
         except:
             self.searchUncensored(number)
+
+    def getHtml(self, url, type = None):
+        scraper = cloudscraper.create_scraper()
+        return scraper.get(url, proxies=self.proxies, headers=self.extraheader).text
 
     def searchUncensored(self, number):
         """ 二次搜索无码
